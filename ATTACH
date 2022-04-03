@@ -1,0 +1,4 @@
+EXEC sp_detach_db 'SMC202015086'
+EXEC sp_attach_db @DBNAME = 'SMC202015086',
+@FILENAME1 = 'D:\SQLDB\SMC.mdf',
+@FILENAME2 = 'D:\SQLDB\SMC.ldf'
