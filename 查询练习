@@ -25,3 +25,41 @@ ON A.ID = B.SID AND B.CID = '01'
 	ON A.ID = C.SID
 	AND C.CID = '02'
 	WHERE B.SSCORE < C.SSCORE
+
+-- 3、查询平均成绩大于等于60分的同学的学生编号和学生姓名和平均成绩
+SELECT A.ID ,A.NAME ,ROUND(AVG(B.sscore),2) as avg_score
+FROM STUDENT A 
+JOIN SCORE B
+ON A.ID = B.SID
+GROUP BY A.ID ,A.NAME 
+HAVING ROUND(AVG(B.sscore),2) >=60
+
+-- 4、查询平均成绩小于60分的同学的学生编号和学生姓名和平均成绩
+		-- (包括有成绩的和无成绩的)
+SELECT B.ID ,B.NAME ,ROUND(AVG(a.sscore),2) as avg_score 
+FROM STUDENT B
+LEFT JOIN SCORE A 
+ON B.ID = A.SID
+GROUP BY B.ID ,B.NAME
+HAVING ROUND(AVG(a.sscore),2) <60
+
+UNION
+
+SELECT A.ID ,A.NAME ,0 as avg_score 
+FROM STUDENT A
+WHERE A.ID NOT IN(
+	SELECT DISTINCT SID
+	FROM SCORE)
+	
+-- 5、查询所有同学的学生编号、学生姓名、选课总数、所有课程的总成绩
+SELECT A.ID ,A.NAME ,COUNT(B.CID) AS SUM_COURSE ,SUM(B.SSCORE) AS SUM_SCORE
+FROM STUDENT A
+LEFT JOIN SCORE B
+ON A.ID = B.SID
+GROUP BY A.ID,A.NAME
+
+-- 6、查询"李"姓老师的数量 
+SELECT COUNT(TID) AS TEACHER_NUM
+FROM TEACHER
+WHERE TNAME LIKE '李%'
+
