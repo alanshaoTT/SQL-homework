@@ -1,0 +1,54 @@
+-- 11、查询没有学全所有课程的同学的信息 
+SELECT S.* FROM STUDENT S
+LEFT JOIN SCORE S1 ON S1.SID = S.ID
+GROUP BY S.ID 
+HAVING COUNT(S1.CID) < (SELECT COUNT(*) FROM COURSE)
+
+-- 12、查询至少有一门课与学号为"01"的同学所学相同的同学的信息 
+SELECT * FROM STUDENT 
+WHERE ID IN (
+	SELECT DISTINCT A.SID FROM SCORE A
+	WHERE A.CID IN (SELECT A.CID FROM SCORE B 
+	WHERE B.SID = '01'))
+  
+  -- 13、查询和"01"号的同学学习的课程完全相同的其他同学的信息 
+SELECT Student.* FROM Student
+WHERE id IN (SELECT Cid FROM Score
+	GROUP BY Cid 
+	HAVING COUNT(Cid) = (
+    --下面的语句是找到'01'同学学习的课程数
+    SELECT COUNT(cid) FROM Score WHERE id = '01'
+   )
+ )
+AND id NOT IN (
+ --下面的语句是找到学过‘01’同学没学过的课程，有哪些同学。并排除他们
+ SELECT id FROM Score
+ WHERE cid IN(
+   --下面的语句是找到‘01’同学没学过的课程
+   SELECT DISTINCT cid FROM Score
+   WHERE cid NOT IN (
+     --下面的语句是找出‘01’同学学习的课程
+     SELECT cid FROM Score WHERE sid = '01'
+    )
+  ) GROUP BY sid
+) --下面的条件是排除01同学
+AND id != '01'
+
+-- 14、查询没学过"张三"老师讲授的任一门课程的学生姓名 
+SELECT A.NAME FROM STUDENT A
+WHERE A.ID NOT IN(
+	SELECT B.SID FROM SCORE B
+	WHERE B.CID NOT IN(
+		SELECT C.CID FROM COURSE C
+		WHERE C.TID NOT IN(
+			SELECT D.TID FROM TEACHER D
+			WHERE D.TNAME != '张三')))
+      
+-- 15、查询两门及其以上不及格课程的同学的学号，姓名及其平均成绩 
+select a.id,a.name,ROUND(AVG(b.sscore),2) from 
+	student a 
+	left join score b on a.id = b.sid
+	where a.id in(
+			select sid from score where sscore<60 
+			GROUP BY  sid having count(1)>=2)
+	GROUP BY a.id,a.name
